@@ -66,15 +66,18 @@ int main(int argc, char *argv[])
 
     ttyInit(fd);
     
-    char buf[10];
+    char raw_data[8];
+    char str_distance[] = "0.000\n\r";
     int n = 0;
+    
     InitWindow(WIDTH, HEIGHT, "Radar");
     SetTargetFPS(FPS);
     while (!WindowShouldClose()) {
-	n = read(fd, buf, sizeof(buf));
+	n = read(fd, raw_data, sizeof(raw_data));
 	// if (n > 0) write(STDOUT_FILENO, buf, n);
-
-	float distance = atof(buf);
+	if (n > 0) sprintf(str_distance, "%.*s", 8, raw_data);
+	
+	float distance = atof(str_distance);
 	if (distance > MAX_RANGE) distance = MAX_RANGE;
 
 	Draw_radar(distance);

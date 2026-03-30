@@ -53,12 +53,16 @@ $ stty -F /dev/ttyACM0 $(cat confTTY.txt)
 
 ## connections
 
+<div align="center">
+
 |  HC-SR04  |    Arduino    |
 |-----------|---------------|
 |   Vcc     |      5v       |
 |   GND     |     GND       |
 |   Trig    |   PB2(~10)    |
 |   Echo    | PB0(PCINT0 8) |
+
+</div>
 
 
 ## Exemples:
