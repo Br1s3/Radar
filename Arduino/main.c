@@ -8,16 +8,21 @@
 
 #include "print.h"
 
+int count = 0;
+int inc = 1;
+
 void PWM(short int a)
 {
     switch (a)
     {
-	// case 1: // PWM rotation pour servo moteur
-	//     TCCR2A = (1 << COM2A1) | (1 << WGM20) | (1 << WGM21);
-	//     TCCR2B = (7 << CS20);
-	//     TCNT2 = 0x00;
-	//     OCR2A = cycle;
-	//     break;
+	case 1: // PWM rotation pour servo moteur
+	/* WGM20 = 0, WGM21 = 1, WGM22 = 1 -> Fast PWM mode */
+	    // TCCR2A = (1 << COM2A1) | (1 << WGM20) | (1 << WGM21);
+	    TCCR2A = (1 << COM2A1) | (1 << WGM22) | (1 << WGM20);
+	    TCCR2B = (7 << CS20);
+	    TCNT2 = 0x00;
+	    OCR2A = 15;
+	    break;
 	
 	case 2: // Starts a timer for the "HC-SR04" echo response
 	    TCCR1A = (1 << COM1A1) | (1 << WGM10); 
@@ -38,7 +43,7 @@ void PWM(short int a)
 void Port_init()
 {
     DDRB &= ~(1 << DDB0); // Echo reponse from HC-SR04
-    DDRB |= (1 << DDB5) | (1 << DDB2) | (1 << DDB1); // PB2 Trig for HC-SR04 and PB1 is a timer PB5 is for the L led
+    DDRB |= (1 << DDB5) | (1 << DDB3) | (1 << DDB2) | (1 << DDB1); // PB2 Trig for HC-SR04 and PB1 is a timer PB5 is for the L led
 
     PCICR = (1 << PCIE0); // Set the jump into ISR when interruption occur
     PCIFR = (1 << PCIF0); // Re-initialise all interruption that occur
@@ -64,7 +69,7 @@ int main(void)
     USART_Init(0);
     Port_init();
     sei();
-
+    PWM(1);
     while (1) {
 
 	demande_de_mesure();
@@ -73,6 +78,7 @@ int main(void)
 	    _delay_ms(1);
 
 	PORTB ^= (1 << PORTB5);
+
     }
 }
 
@@ -91,11 +97,28 @@ ISR (PCINT0_vect)
     PWM(3);
 
     distance = (float)timer*T_PWM2*v*1000.f;
-    // if (timer < TIMER_MAX) {
-	// printf("distance: %.3f\n\r", distance/1000.f);
-	printf("%.3f\n\r", distance/1000.f);
-	// prog_obstacle();
-    // }
-    // else
-    //     printf("ERROR: Mesure HORS PORTEE\r\n");
+
+
+    int OCR2A_buf = OCR2A;
+    if (count++ < 5) ;
+    else {
+	count = 0;
+	if (inc == 1 && OCR2A_buf < 20) {
+	    OCR2A_buf++;
+	}
+	else if (OCR2A_buf >= 20) {
+	    inc = 0;
+	    OCR2A_buf--;
+	}
+	else if (inc == 0 && OCR2A_buf > 3) {
+	    OCR2A_buf--;
+	}
+	else if (OCR2A_buf <= 3) {
+	    inc = 1;
+	    OCR2A_buf++;
+	}
+    }
+    
+    printf("%02d,%.3f\n\r", OCR2A_buf-3, distance/1000.f);
+    OCR2A = OCR2A_buf;
 }

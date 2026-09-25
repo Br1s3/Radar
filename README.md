@@ -80,6 +80,9 @@ $ stty -F /dev/ttyACM0 $(cat confTTY.txt)
 _HC-SR04 datasheet_
 - https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf
 
+_SG90 Servo Motor_
+- http://www.ee.ic.ac.uk/pcheung/teaching/DE1_EE/stores/sg90_datasheet.pdf
+
 _ATmega328p datasheet_
 - https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf
 
