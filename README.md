@@ -58,9 +58,19 @@ $ stty -F /dev/ttyACM0 $(cat confTTY.txt)
 |  HC-SR04  |    Arduino    |
 |-----------|---------------|
 |   Vcc     |      5v       |
+|   GND     |      GND      |
+|   Trig    |     PD7(7)    |
+|   Echo    | PB0/PCINT0(8) |
+
+</div>
+
+<div align="center">
+
+|   SG90    |    Arduino    |
+|-----------|---------------|
+|   Vcc     |     Vin       |
 |   GND     |     GND       |
 |   Trig    |   PB2(~10)    |
-|   Echo    | PB0(PCINT0 8) |
 
 </div>
 
