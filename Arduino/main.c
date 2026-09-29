@@ -16,25 +16,27 @@ void PWM(short int a)
     switch (a)
     {
 	case 1: // PWM rotation pour servo moteur
-	/* WGM20 = 0, WGM21 = 1, WGM22 = 1 -> Fast PWM mode */
-	    // TCCR2A = (1 << COM2A1) | (1 << WGM20) | (1 << WGM21);
-	    TCCR2A = (1 << COM2A1) | (1 << WGM22) | (1 << WGM20);
-	    TCCR2B = (7 << CS20);
-	    TCNT2 = 0x00;
-	    OCR2A = 15;
+	/* WGM20 = 0, WGM20 = 1, WGM22 = 1 -> Correct Phase PWM mode
+	 * COM2B1 = 1 -> Change the TOP value of the PWM to get 50Hz require for the Servo motor
+	 */
+	    TCCR1A = (1 << COM1B1) | (1 << WGM10) | (1 << WGM11);
+	    TCCR1B = (1 << WGM13) | (1 << CS11);
+	    TCNT1 = 0x00;
+	    OCR1A = 0x4E20;
+	    OCR1B = 1000;
 	    break;
 	
 	case 2: // Starts a timer for the "HC-SR04" echo response
-	    TCCR1A = (1 << COM1A1) | (1 << WGM10); 
-	    TCCR1B = (1 << WGM12) | (1 << CS10); // Mode 5 Fast PWM 8bit
-	    TCNT1 = 0; // Start to 0
-	    OCR1A = 128; // 50% duty cycle
+	    TCCR2A = (1 << COM2A1) | (1 << WGM20) | (1 << WGM21);
+	    TCCR2B = (1 << CS20); // Mode 5 Fast PWM 8bit
+	    TCNT2 = 0; // Start to 0
+	    OCR2A = 128; // 50% duty cycle
 	    break;
 
 	case 3: // Stop the timer
-	    TCCR1A = 0;
-	    TCCR1B = 0;
-	    PORTB &= ~(1 << PORTB1);
+	    TCCR2A = 0;
+	    TCCR2B = 0;
+	    PORTB &= ~(1 << PORTB3);
 	default:
 	    break;
     }
@@ -43,18 +45,19 @@ void PWM(short int a)
 void Port_init()
 {
     DDRB &= ~(1 << DDB0); // Echo reponse from HC-SR04
-    DDRB |= (1 << DDB5) | (1 << DDB3) | (1 << DDB2) | (1 << DDB1); // PB2 Trig for HC-SR04 and PB1 is a timer PB5 is for the L led
+    DDRB |= (1 << DDB5) | (1 << DDB3) | (1 << DDB2) | (1 << DDB1); // and PB1 is a timer PB5 is for the L led
+    DDRD |= (1 << DDD3) | (1 << DDD7); // PD7 Trig for HC-SR04
 
     PCICR = (1 << PCIE0); // Set the jump into ISR when interruption occur
     PCIFR = (1 << PCIF0); // Re-initialise all interruption that occur
-    PCMSK0 = (1 << PCINT0); // Active the interruption on DDB0
+    PCMSK0 = (1 << PCINT0); // Active the interruption on DDB2
 }
 
 void demande_de_mesure()
 {
-    PORTB |= (1 << PORTB2);
+    PORTD |= (1 << PORTD7);
     _delay_us(10);
-    PORTB &= ~(1 << PORTB2);
+    PORTD &= ~(1 << PORTD7);
 }
 
 #define T_PWM2 0.00001605f
@@ -89,7 +92,7 @@ ISR (PCINT0_vect)
     timer = 0;
     while (PINB & (1 << PINB0)) {
 	bool pass = false;
-	while (PINB & (1 << PINB1)) {
+	while (PINB & (1 << PINB3)) {
 	    if (pass == false) timer++;
 	    pass = true;
 	}
@@ -98,27 +101,30 @@ ISR (PCINT0_vect)
 
     distance = (float)timer*T_PWM2*v*1000.f;
 
-
-    int OCR2A_buf = OCR2A;
-    if (count++ < 5) ;
-    else {
-	count = 0;
-	if (inc == 1 && OCR2A_buf < 20) {
-	    OCR2A_buf++;
-	}
-	else if (OCR2A_buf >= 20) {
-	    inc = 0;
-	    OCR2A_buf--;
-	}
-	else if (inc == 0 && OCR2A_buf > 3) {
-	    OCR2A_buf--;
-	}
-	else if (OCR2A_buf <= 3) {
-	    inc = 1;
-	    OCR2A_buf++;
-	}
-    }
+    // Minith -> 1000 = 1ms, Mid -> 1500 = 1.5ms, Maxth -> 2000 = 2ms
+    // Mini -> 5 = 0.5ms, Mid -> 1500 = 1.5ms, Max -> 2750 = 2.75ms
     
-    printf("%02d,%.3f\n\r", OCR2A_buf-3, distance/1000.f);
-    OCR2A = OCR2A_buf;
+    int OCR1B_buf = OCR1B;
+    // if (count++ < 5) ;
+    // if (count++ < 1) ;
+    // else {
+    // 	count = 0;
+	if (inc == 1 && OCR1B_buf < 2750) {
+	    OCR1B_buf+=25;
+	}
+	else if (OCR1B_buf >= 2750) {
+	    inc = 0;
+	    OCR1B_buf-=25;
+	}
+	else if (inc == 0 && OCR1B_buf > 500) {
+	    OCR1B_buf-=25;
+	}
+	else if (OCR1B_buf <= 500) {
+	    inc = 1;
+	    OCR1B_buf+=25;
+	}
+    // }
+    // OCR1B_buf = 5;
+    OCR1B = OCR1B_buf;
+    printf("%04d,%.3f\n\r", OCR1B_buf-500, distance/1000.f);
 }
