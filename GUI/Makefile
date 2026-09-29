@@ -1,7 +1,7 @@
 CC = gcc
 RM = rm -rfv
 EXEC +=\
-main
+Radar
 
 CFLAGS +=\
 -Wextra \
