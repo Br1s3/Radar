@@ -74,8 +74,8 @@ void Draw_radar(int pos, double *dis)
     Draw_radar_BG(pos, dis, midW, midH, BG_size_ratio, BG_layer, BG_size, BG_density_layer);
 
     for (int i = 0; i < 91; i++) {
-	if (i == pos) DrawCircle(midW + BG_size*(dis[pos]/MAX_RANGE)*(cosf((double)pos/90.f*M_PI)), midH + BG_size*(dis[pos]/MAX_RANGE)*(-sinf((double)pos/90.f*M_PI))+200, 5, RED);
-	else DrawCircle(midW + BG_size*(dis[i]/MAX_RANGE)*(cosf((double)i/90.f*M_PI)), midH + BG_size*(dis[i]/MAX_RANGE)*(-sinf((double)i/90.f*M_PI))+200, 4, DARKBLUE);
+	if (i != pos) DrawCircle(midW + BG_size*(dis[i]/MAX_RANGE)*(cosf((double)i/90.f*M_PI)), midH + BG_size*(dis[i]/MAX_RANGE)*(-sinf((double)i/90.f*M_PI))+200, 4, DARKBLUE);
+	else DrawCircle(midW + BG_size*(dis[pos]/MAX_RANGE)*(cosf((double)pos/90.f*M_PI)), midH + BG_size*(dis[pos]/MAX_RANGE)*(-sinf((double)pos/90.f*M_PI))+200, 5, RED);
     }
     
     DrawFPS(20, 20);
