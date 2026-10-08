@@ -30,7 +30,11 @@ $ screen /dev/ttyACM0 1000000
 
 _To quite screen:_
 ```concole
-$ C-a C-k y
+$ C-a k y
+```
+_or_
+```concole
+$ C-a C-c
 ```
 
 _Tip to save the terminal config_
@@ -77,12 +81,14 @@ $ stty -F /dev/ttyACM0 $(cat confTTY.txt)
 
 ## Exemples:
 
-[![Exemple of the GUI](./picture/Radar.png)](/picture)
+[![Exemple of the GUI](./picture/Radar2p0.png)](/picture)
 
 
 ## Datasheet
 
 [![Arduino board pin](./picture/Arduino-board-pin.jpg)](/picture)
+
+[![Servo motor Architecture](./picture/SG90ServoMotor.png)](/picture)
 
 
 ## References:
