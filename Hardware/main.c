@@ -8,8 +8,15 @@
 
 #include "print.h"
 
-int inc = 1;
+#define T_PWM1 0.000016f
+#define v 170.f
+#define TIMER_MAX 2000
+
+int rotation = 1;
 unsigned int AngleImage = 0;
+unsigned int timer;
+float distance;
+
 
 void PWM(short int a)
 {
@@ -75,12 +82,6 @@ void demande_de_mesure()
     PORTD &= ~(1 << PORTD7);
 }
 
-#define T_PWM1 0.000016f
-#define v 170.f
-#define TIMER_MAX 2000
-
-unsigned int timer;
-float distance;
 
 int main(void)
 {
@@ -99,18 +100,18 @@ int main(void)
 	// Mini -> 5 = 0.5ms, Mid -> 1500 = 1.5ms, Max -> 2750 = 2.75ms
 	
 	AngleImage = OCR1B;
-	if (inc == 1 && AngleImage < 2750) {
+	if (rotation == 1 && AngleImage < 2750) {
 	    AngleImage+=25;
 	}
 	else if (AngleImage >= 2750) {
-	    inc = 0;
+	    rotation = 0;
 	    AngleImage-=25;
 	}
-	else if (inc == 0 && AngleImage > 500) {
+	else if (rotation == 0 && AngleImage > 500) {
 	    AngleImage-=25;
 	}
 	else if (AngleImage <= 500) {
-	    inc = 1;
+	    rotation = 1;
 	    AngleImage+=25;
 	}
 

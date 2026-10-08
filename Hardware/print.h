@@ -7,8 +7,4 @@ void USART_Init(unsigned int baudrate);
 int USART_Transmit(char data, FILE *stream);
 
 
-
-
-
-
 #endif //PRINT_H_INCLUDED
